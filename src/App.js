@@ -1,7 +1,15 @@
 import React from 'react';
+import ThemeSwitch from './components/ThemeSwitch';
+import Router from './routes';
 
 function App() {
-  return <div className='App'>hi</div>;
+  console.log('App.js');
+  return (
+    <>
+      <ThemeSwitch />
+      <Router />
+    </>
+  );
 }
 
 export default App;
