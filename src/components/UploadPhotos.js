@@ -22,7 +22,7 @@ import React, { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCloudArrowUp } from '@fortawesome/free-solid-svg-icons';
 import { useDropzone } from 'react-dropzone';
-import { uploadPhotos } from '../api/photos';
+import { getUploadUrl, uploadPhotos } from '../api/photos';
 
 const thumbsContainer = {
   display: 'flex',
@@ -64,6 +64,7 @@ const UploadPhotos = () => {
         'image/jpeg': [],
         'image/png': [],
         'image/heic': [],
+        'video/mp4': [],
       },
       onDrop: (acceptedFiles) => {
         setFiles(
@@ -79,23 +80,21 @@ const UploadPhotos = () => {
   const uploadImages = async () => {
     try {
       setUploading(true);
-      // for (let i = 0; i < files.length; i++) {
-      //   const formData = new FormData();
-      //   if (files[i]) {
-      //     formData.append(`photo${i}`, files[i]);
-      //   }
-      //   const response = await uploadPhotos(formData);
-      //   console.log(response);
-      //   setUploaded(i + 1);
-      // }
-      // toast({
-      //   title: 'Photos uploaded successfully',
-      //   status: 'success',
-      //   duration: 3000,
-      //   isClosable: true,
-      // });
-      const resp = await uploadPhotos(files);
-      console.log(resp);
+      for (let i = 0; i < files.length; i++) {
+        const resp = await getUploadUrl(files);
+        if (files[i]) {
+          const rr = await uploadPhotos(files[i], resp.data.url);
+          console.log(rr);
+        }
+        setUploaded(i + 1);
+      }
+      toast({
+        title: 'Photos uploaded successfully',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+
       setUploading(false);
     } catch (error) {
       console.log(error);
@@ -174,7 +173,7 @@ const UploadPhotos = () => {
       >
         <ModalOverlay />
         <ModalContent w='80vw'>
-          <ModalHeader>Modal Title</ModalHeader>
+          <ModalHeader>Upload Photos</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <Box width={'100%'} h='100%' className='container'>
@@ -183,7 +182,7 @@ const UploadPhotos = () => {
                 border={'1px dashed'}
                 borderColor='blue.400'
                 borderRadius='5px'
-                bg='blue.50'
+                // bg='blue.50'
                 {...getRootProps({ className: 'dropzone' })}
               >
                 <Flex

@@ -1,7 +1,12 @@
 import { useToast } from '@chakra-ui/react';
 import { createContext, useEffect, useReducer } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getCurrentUser, signIn, signUp } from '../api/cognito';
+import {
+  getCurrentUser,
+  getUserAttributes,
+  signIn,
+  signUp,
+} from '../api/cognito';
 import { isValidToken } from '../utils/jwt';
 
 const initialState = {
@@ -122,7 +127,6 @@ const AuthProvider = ({ children }) => {
       const { idToken } = result;
       localStorage.setItem('accessToken', idToken.jwtToken);
       const user = await getCurrentUser();
-      console.log(user);
       dispatch({
         type: 'LOGIN',
         payload: {
@@ -131,6 +135,7 @@ const AuthProvider = ({ children }) => {
       });
     } catch (error) {
       console.error(error);
+      throw error;
     }
   };
 

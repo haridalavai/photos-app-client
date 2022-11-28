@@ -16,14 +16,58 @@ import {
   HStack,
   InputGroup,
   InputRightElement,
+  useToast,
+  FormErrorMessage,
 } from '@chakra-ui/react';
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 import useAuth from '../../hooks/useAuth';
+import { Field, Form, Formik } from 'formik';
+import { validateEmail, validatePassword } from '../../validation/validation';
+import { signUp } from '../../api/cognito';
+import { useNavigate } from 'react-router-dom';
 
 const Register = () => {
   const { register } = useAuth();
+  const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const toast = useToast();
+
+  const initialValues = {
+    email: '',
+    password: '',
+  };
+
+  const onSubmit = async (values) => {
+    try {
+      setLoading(true);
+      console.log(values);
+      const a = await signUp(values.email, values.password);
+
+      console.log(a);
+      toast({
+        title: 'Login Successful',
+        description: 'You have successfully logged in',
+        status: 'success',
+        duration: 5000,
+        isClosable: true,
+      });
+      navigate(`/auth/verify/${values.email}`);
+      setLoading(false);
+    } catch (error) {
+      console.log(error.message);
+      toast({
+        title: 'Error',
+        description: error.message,
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+      setLoading(false);
+    }
+  };
 
   return (
     <Stack minH={'100vh'} direction={{ base: 'column', md: 'row' }}>
@@ -48,51 +92,76 @@ const Register = () => {
             boxShadow={'lg'}
             p={8}
           >
-            <Stack spacing={4}>
-              <FormControl id='firstName' isRequired>
-                <FormLabel>Username</FormLabel>
-                <Input type='text' />
-              </FormControl>
-
-              <FormControl id='email' isRequired>
-                <FormLabel>Email address</FormLabel>
-                <Input type='email' />
-              </FormControl>
-              <FormControl id='password' isRequired>
-                <FormLabel>Password</FormLabel>
-                <InputGroup>
-                  <Input type={showPassword ? 'text' : 'password'} />
-                  <InputRightElement h={'full'}>
+            <Formik initialValues={initialValues} onSubmit={onSubmit}>
+              <Form>
+                <Stack spacing={4}>
+                  <Field name='email' validate={validateEmail}>
+                    {({ field, form }) => (
+                      <FormControl
+                        id='email'
+                        isInvalid={form.errors.email && form.touched.email}
+                      >
+                        <FormLabel>Email address</FormLabel>
+                        <Input {...field} type='email' />
+                        <FormErrorMessage>{form.errors.email}</FormErrorMessage>
+                      </FormControl>
+                    )}
+                  </Field>
+                  <Field name='password' validate={validatePassword}>
+                    {({ field, form }) => (
+                      <FormControl
+                        id='password'
+                        isInvalid={
+                          form.errors.password && form.touched.password
+                        }
+                        isRequired
+                      >
+                        <FormLabel>Password</FormLabel>
+                        <InputGroup>
+                          <Input
+                            type={showPassword ? 'text' : 'password'}
+                            {...field}
+                          />
+                          <InputRightElement h={'full'}>
+                            <Button
+                              variant={'ghost'}
+                              onClick={() =>
+                                setShowPassword((showPassword) => !showPassword)
+                              }
+                            >
+                              {showPassword ? <ViewIcon /> : <ViewOffIcon />}
+                            </Button>
+                          </InputRightElement>
+                        </InputGroup>
+                        <FormErrorMessage>
+                          {form.errors.password}
+                        </FormErrorMessage>
+                      </FormControl>
+                    )}
+                  </Field>
+                  <Stack spacing={10} pt={2}>
                     <Button
-                      variant={'ghost'}
-                      onClick={() =>
-                        setShowPassword((showPassword) => !showPassword)
-                      }
+                      loadingText='Submitting'
+                      size='lg'
+                      variant={'solid'}
+                      colorScheme={'blue'}
+                      isLoading={loading}
+                      type='submit'
                     >
-                      {showPassword ? <ViewIcon /> : <ViewOffIcon />}
+                      Sign up
                     </Button>
-                  </InputRightElement>
-                </InputGroup>
-              </FormControl>
-              <Stack spacing={10} pt={2}>
-                <Button
-                  loadingText='Submitting'
-                  size='lg'
-                  variant={'solid'}
-                  colorScheme={'blue'}
-                >
-                  Sign up
-                </Button>
-              </Stack>
-              <Stack pt={6}>
-                <Text align={'center'}>
-                  Already a user?{' '}
-                  <Link color={'blue.400'} href={'/auth/login'}>
-                    Login
-                  </Link>
-                </Text>
-              </Stack>
-            </Stack>
+                  </Stack>
+                  <Stack pt={6}>
+                    <Text align={'center'}>
+                      Already a user?{' '}
+                      <Link color={'blue.400'} href={'/auth/login'}>
+                        Login
+                      </Link>
+                    </Text>
+                  </Stack>
+                </Stack>
+              </Form>
+            </Formik>
           </Box>
         </Stack>
       </Flex>

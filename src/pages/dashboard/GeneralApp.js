@@ -10,7 +10,9 @@ import InfiniteScroll from 'react-infinite-scroller';
 import LightGallery from 'lightgallery/react';
 import lgThumbnail from 'lightgallery/plugins/thumbnail';
 import lgZoom from 'lightgallery/plugins/zoom';
+import lgVideo from 'lightgallery/plugins/video';
 import './GeneralApp.css';
+import Video from '../../components/video';
 
 const GeneralApp = () => {
   const [thumbnails, setThumbnails] = React.useState([]);
@@ -55,26 +57,32 @@ const GeneralApp = () => {
       >
         <LightGallery
           speed={500}
-          plugins={[lgThumbnail, lgZoom]}
+          plugins={[lgThumbnail, lgZoom, lgVideo]}
           elementClassNames='gclass'
         >
           {thumbnails.map((thumbnail, index) => (
-            <a
-              key={index}
-              data-src={thumbnail.webView}
-              data-download-url={thumbnail.original}
-            >
-              <Img
-                key={index}
-                src={thumbnail.thumbnail}
-                alt={thumbnail.name}
-                marginRight='2'
-                marginBottom='2'
-                marginTop='2'
-                h='100px'
-                cursor='pointer'
-              />
-            </a>
+            <>
+              {thumbnail.type === 'image' ? (
+                <a
+                  key={index}
+                  data-src={thumbnail.webView}
+                  data-download-url={thumbnail.original}
+                >
+                  <Img
+                    key={index}
+                    src={thumbnail.thumbnail}
+                    alt={thumbnail.name}
+                    marginRight='2'
+                    marginBottom='2'
+                    marginTop='2'
+                    h='100px'
+                    cursor='pointer'
+                  />
+                </a>
+              ) : (
+                <Video thumbnail={thumbnail} index={index} />
+              )}
+            </>
           ))}
         </LightGallery>
       </InfiniteScroll>

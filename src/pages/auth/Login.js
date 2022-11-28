@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Button,
   Checkbox,
@@ -14,13 +14,23 @@ import {
   Box,
   Text,
   FormErrorMessage,
+  useToast,
+  InputGroup,
+  InputRightElement,
 } from '@chakra-ui/react';
 import { Formik, useFormik, Form, Field } from 'formik';
 import { validateEmail, validatePassword } from '../../validation/validation';
 import useAuth from '../../hooks/useAuth';
+import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
   const { login } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+  const toast = useToast();
+  const navigate = useNavigate();
 
   const initialValues = {
     email: '',
@@ -29,9 +39,41 @@ const Login = () => {
 
   const onSubmit = async (values) => {
     try {
-      await login(values.email, values.password);
+      setLoading(true);
+      const a = await login(values.email, values.password);
+      console.log(a);
+      toast({
+        title: 'Login Successful',
+        description: 'You have successfully logged in',
+        status: 'success',
+        duration: 5000,
+        isClosable: true,
+      });
+      setLoading(false);
     } catch (error) {
       console.log(error.message);
+      if (error.message === 'User is not confirmed.') {
+        toast({
+          title: 'User is not confirmed',
+          description: 'Please verify your email',
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+        });
+
+        navigate(`/auth/verify/`);
+
+        setLoading(false);
+      } else {
+        toast({
+          title: 'Error',
+          description: error.message,
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+        });
+        setLoading(false);
+      }
     }
   };
 
@@ -90,7 +132,22 @@ const Login = () => {
                         }
                       >
                         <FormLabel>Password</FormLabel>
-                        <Input {...field} type='password' />
+                        <InputGroup>
+                          <Input
+                            type={showPassword ? 'text' : 'password'}
+                            {...field}
+                          />
+                          <InputRightElement h={'full'}>
+                            <Button
+                              variant={'ghost'}
+                              onClick={() =>
+                                setShowPassword((showPassword) => !showPassword)
+                              }
+                            >
+                              {showPassword ? <ViewIcon /> : <ViewOffIcon />}
+                            </Button>
+                          </InputRightElement>
+                        </InputGroup>
                         <FormErrorMessage>
                           {form.errors.password}
                         </FormErrorMessage>
@@ -112,6 +169,7 @@ const Login = () => {
                         bg: 'blue.500',
                       }}
                       type='submit'
+                      isLoading={loading}
                     >
                       Sign in
                     </Button>

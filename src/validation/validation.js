@@ -41,3 +41,15 @@ export const validatePassword = (password) => {
   }
   return error;
 };
+
+export const validatePin = (pin) => {
+  let error = '';
+  if (!pin) {
+    error = 'PIN is required';
+  } else if (pin.length !== 6) {
+    error = 'PIN must be 6 characters';
+  } else if (!/^[0-9]+$/.test(pin)) {
+    error = 'PIN must be numeric';
+  }
+  return error;
+};
