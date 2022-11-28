@@ -200,9 +200,6 @@ const UploadPhotos = () => {
                       <p>
                         Drag 'n' drop some files here, or click to select files
                       </p>
-                      <em>
-                        (Only *.jpeg, *.png, *heic images will be accepted)
-                      </em>
                     </VStack>
                   ) : (
                     thumbs
