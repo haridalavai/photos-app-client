@@ -39,7 +39,8 @@ export default function Router() {
           ),
         },
         { path: 'reset-password', element: <ResetPassword /> },
-        { path: 'verify', element: <VerifyCode /> },
+        { path: 'verify', element: <VerifyEmail /> },
+        { path: 'verify/:email', element: <VerifyCode /> },
       ],
     },
 
@@ -86,6 +87,7 @@ const ResetPassword = Loadable(
   lazy(() => import('../pages/auth/ResetPassword'))
 );
 const VerifyCode = Loadable(lazy(() => import('../pages/auth/VerifyCode')));
+const VerifyEmail = Loadable(lazy(() => import('../pages/auth/VerifyEmail')));
 const GeneralApp = Loadable(
   lazy(() => import('../pages/dashboard/GeneralApp'))
 );
